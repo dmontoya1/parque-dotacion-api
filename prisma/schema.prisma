@@ -1,0 +1,98 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Modelo Usuario
+model Usuario {
+  id          Int      @id @default(autoincrement())
+  nombre      String   @db.VarChar(255)
+  correo      String   @unique @db.VarChar(255)
+  tipoUsuario String   @map("tipo_usuario") @db.VarChar(50)
+  password    String?  @db.VarChar(255)
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  // Relaciones
+  horariosDotacion HorariosDotacion[]
+
+  @@map("usuarios")
+}
+
+// Modelo Parque
+model Parque {
+  id        Int      @id @default(autoincrement())
+  nombre    String   @db.VarChar(255)
+  direccion String   @db.VarChar(500)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // Relaciones
+  dotacionesEscenario DotacionEscenario[]
+
+  @@map("parques")
+}
+
+// Modelo Categoría Actividad
+model CategoriaActividad {
+  id             Int      @id @default(autoincrement())
+  nombre         String   @db.VarChar(255)
+  nivelPrioridad Int      @map("nivel_prioridad")
+  descripcion    String?  @db.Text
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  // Relaciones
+  horariosDotacion HorariosDotacion[]
+
+  @@map("categoria_actividad")
+}
+
+// Modelo Dotación Escenario
+model DotacionEscenario {
+  id        Int      @id @default(autoincrement())
+  parqueId  Int      @map("parque_id")
+  nombre    String   @db.VarChar(255)
+  direccion String   @db.VarChar(500)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // Relaciones
+  parque           Parque             @relation(fields: [parqueId], references: [id], onDelete: Cascade)
+  horariosDotacion HorariosDotacion[]
+
+  @@map("dotacion_escenario")
+}
+
+// Modelo Horarios Dotación
+model HorariosDotacion {
+  id                   Int      @id @default(autoincrement())
+  idCategoriaActividad Int      @map("id_categoria_actividad")
+  horaInicio           String   @map("hora_inicio") @db.VarChar(10)
+  horaFin              String   @map("hora_fin") @db.VarChar(10)
+  fechaInicio          DateTime @map("fecha_inicio") @db.Date
+  fechaFin             DateTime @map("fecha_fin") @db.Date
+  dotacionEscenario    Int      @map("dotacion_escenario")
+  idUsuario            Int      @map("id_usuario")
+  dia                  String   @db.VarChar(20)
+  createdAt            DateTime @default(now()) @map("created_at")
+  updatedAt            DateTime @updatedAt @map("updated_at")
+
+  // Relaciones
+  categoriaActividad   CategoriaActividad @relation(fields: [idCategoriaActividad], references: [id], onDelete: Cascade)
+  dotacionEscenarioRel DotacionEscenario  @relation(fields: [dotacionEscenario], references: [id], onDelete: Cascade)
+  usuario              Usuario            @relation(fields: [idUsuario], references: [id], onDelete: Cascade)
+
+  @@map("horarios_dotacion")
+}
