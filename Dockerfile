@@ -1,18 +1,27 @@
-FROM node:22-alpine
+FROM node:18-alpine
+
+# Instalar OpenSSL (requerido por Prisma)
+RUN apk add --no-cache openssl
 
 WORKDIR /app
 
-RUN apk add yarn
+# Copiar archivos de dependencias
+COPY package*.json ./
+COPY prisma ./prisma/
 
-COPY package.json ./
+# Instalar dependencias
+RUN npm ci --only=production
 
-RUN yarn install
+# Generar cliente de Prisma
+RUN npx prisma generate
 
-RUN yarn global add @nestjs/cli
-RUN yarn global add ts-node typescript
-
+# Copiar código fuente
 COPY . .
+
+# Construir aplicación
+RUN npm run build
 
 EXPOSE 3000
 
-CMD ["yarn", "run", "start:dev"]
+# Script de inicio que ejecuta migraciones y luego la app
+CMD ["sh", "-c", "npx prisma migrate deploy && npm run start:prod"]

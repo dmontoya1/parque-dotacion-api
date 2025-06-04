@@ -13,9 +13,8 @@ export default registerAs('app', () => ({
     limit: parseInt(process.env.THROTTLE_LIMIT, 10) || 10,
   },
   swagger: {
-    title: process.env.SWAGGER_TITLE || 'Parque Dotación API',
-    description:
-      process.env.SWAGGER_DESCRIPTION || 'API for Parque Dotación management',
-    version: process.env.SWAGGER_VERSION || '1.0.0',
+    title: process.env.SWAGGER_TITLE || 'API',
+    description: process.env.SWAGGER_DESCRIPTION || 'API Description',
+    version: process.env.SWAGGER_VERSION || '1.0',
   },
 }));

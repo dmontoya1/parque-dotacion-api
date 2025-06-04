@@ -4,7 +4,7 @@ import {
   OnModuleDestroy,
   Logger,
 } from '@nestjs/common';
-import { Prisma, PrismaClient } from '@prisma/client';
+import { PrismaClient } from '@prisma/client';
 
 @Injectable()
 export class PrismaService
@@ -37,14 +37,12 @@ export class PrismaService
   }
 
   async onModuleInit() {
-    // Only log queries in development
-    if (process.env.NODE_ENV !== 'production') {
-      this.$on('query', (event) => {
-        this.logger.debug(`Query: ${event.query}`);
-        this.logger.debug(`Params: ${event.params}`);
-        this.logger.debug(`Duration: ${event.duration}ms`);
-      });
-    }
+    // Logging events
+    this.$on('query', (event) => {
+      this.logger.debug(`Query: ${event.query}`);
+      this.logger.debug(`Params: ${event.params}`);
+      this.logger.debug(`Duration: ${event.duration}ms`);
+    });
 
     this.$on('error', (event) => {
       this.logger.error(`Error: ${event.message}`);
@@ -70,42 +68,19 @@ export class PrismaService
 
   // Utility method for transactions
   async executeTransaction<T>(
-    operations: (prisma: Prisma.TransactionClient) => Promise<T>,
-    maxWait = 5000, // 5 segundos
-    timeout = 10000, // 10 segundos
+    operations: (prisma: PrismaClient) => Promise<T>,
   ): Promise<T> {
-    try {
-      return await this.$transaction(operations, {
-        maxWait,
-        timeout,
-      });
-    } catch (error) {
-      this.logger.error('Transaction failed', error);
-      throw error;
-    }
+    return this.$transaction(operations);
   }
 
-  // Soft delete utility
-  async softDelete<T extends keyof PrismaClient>(
-    model: T,
-    where: Parameters<PrismaClient[T]['update']>[0]['where'],
-  ): Promise<PrismaClient[T]['update']['Result']> {
-    try {
-      const modelClient = this[model as keyof PrismaClient];
-      if (!modelClient) {
-        throw new Error(`Model ${model} not found in PrismaClient`);
-      }
-      return await modelClient.update({
-        where,
-        data: {
-          deletedAt: new Date(),
-        },
-      });
-    } catch (error) {
-      const err = error as Error;
-      this.logger.error(`Error in softDelete for model ${String(model)}`, err);
-      throw err;
-    }
+  // Soft delete utility (if needed)
+  softDelete(model: string, where: any) {
+    return this[model].update({
+      where,
+      data: {
+        deletedAt: new Date(),
+      },
+    });
   }
 
   // Health check method
