@@ -1,98 +1,203 @@
 // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
-  output   = "../generated/prisma"
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "postgresql" // o "mysql"
   url      = env("DATABASE_URL")
 }
 
-// Modelo Usuario
-model Usuario {
-  id          Int      @id @default(autoincrement())
-  nombre      String   @db.VarChar(255)
-  correo      String   @unique @db.VarChar(255)
-  tipoUsuario String   @map("tipo_usuario") @db.VarChar(50)
-  password    String?  @db.VarChar(255)
-  createdAt   DateTime @default(now()) @map("created_at")
-  updatedAt   DateTime @updatedAt @map("updated_at")
+// ================================
+// MÓDULO GENERAL (gn_)
+// ================================
+
+// Modelo Park (Parque)
+model Park {
+  pk_id       Int      @id @default(autoincrement()) @map("pk_id")
+  pk_name     String   @map("pk_name") @db.VarChar(255)
+  pk_address  String   @map("pk_address") @db.VarChar(500)
+  create_at   DateTime @default(now()) @map("create_at")
+  update_at   DateTime @updatedAt @map("update_at")
+  deleted_at  DateTime? @map("deleted_at")
 
   // Relaciones
-  horariosDotacion HorariosDotacion[]
+  scenarios Scenario[]
 
-  @@map("usuarios")
+  @@map("gn_park")
+  @@index([pk_name])
 }
 
-// Modelo Parque
-model Parque {
-  id        Int      @id @default(autoincrement())
-  nombre    String   @db.VarChar(255)
-  direccion String   @db.VarChar(500)
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
+// ================================
+// MÓDULO USUARIOS (us_)
+// ================================
+
+// Modelo User (Usuario)
+model User {
+  us_id        Int      @id @default(autoincrement()) @map("us_id")
+  us_name      String   @map("us_name") @db.VarChar(255)
+  us_email     String   @unique @map("us_email") @db.VarChar(255)
+  us_user_type String   @map("us_user_type") @db.VarChar(50)
+  us_password  String?  @map("us_password") @db.VarChar(255)
+  create_at    DateTime @default(now()) @map("create_at")
+  update_at    DateTime @updatedAt @map("update_at")
+  deleted_at   DateTime? @map("deleted_at")
 
   // Relaciones
-  dotacionesEscenario DotacionEscenario[]
+  schedules ScheduleEndowment[]
+  agendas   Agenda[]
 
-  @@map("parques")
+  @@map("us_user")
+  @@index([us_email])
 }
 
-// Modelo Categoría Actividad
-model CategoriaActividad {
-  id             Int      @id @default(autoincrement())
-  nombre         String   @db.VarChar(255)
-  nivelPrioridad Int      @map("nivel_prioridad")
-  descripcion    String?  @db.Text
-  createdAt      DateTime @default(now()) @map("created_at")
-  updatedAt      DateTime @updatedAt @map("updated_at")
+// ================================
+// MÓDULO ACTIVIDADES (ac_)
+// ================================
+
+// Modelo ActivityCategory (Categoría Actividad)
+model ActivityCategory {
+  ac_id             Int      @id @default(autoincrement()) @map("ac_id")
+  ac_name           String   @map("ac_name") @db.VarChar(255)
+  ac_priority_level Int      @map("ac_priority_level")
+  ac_description    String?  @map("ac_description") @db.Text
+  create_at         DateTime @default(now()) @map("create_at")
+  update_at         DateTime @updatedAt @map("update_at")
+  deleted_at        DateTime? @map("deleted_at")
 
   // Relaciones
-  horariosDotacion HorariosDotacion[]
+  schedules ScheduleEndowment[]
 
-  @@map("categoria_actividad")
+  @@map("ac_activity_category")
+  @@index([ac_name])
+  @@index([ac_priority_level])
 }
 
-// Modelo Dotación Escenario
-model DotacionEscenario {
-  id        Int      @id @default(autoincrement())
-  parqueId  Int      @map("parque_id")
-  nombre    String   @db.VarChar(255)
-  direccion String   @db.VarChar(500)
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
+// ================================
+// MÓDULO ESCENARIOS (sc_)
+// ================================
+
+// Modelo Scenario (Dotación Escenario)
+model Scenario {
+  sc_id      Int      @id @default(autoincrement()) @map("sc_id")
+  pk_id      Int      @map("pk_id")
+  sc_name    String   @map("sc_name") @db.VarChar(255)
+  sc_address String   @map("sc_address") @db.VarChar(500)
+  create_at  DateTime @default(now()) @map("create_at")
+  update_at  DateTime @updatedAt @map("update_at")
+  deleted_at DateTime? @map("deleted_at")
 
   // Relaciones
-  parque           Parque             @relation(fields: [parqueId], references: [id], onDelete: Cascade)
-  horariosDotacion HorariosDotacion[]
+  park       Park               @relation(fields: [pk_id], references: [pk_id], onDelete: Cascade)
+  schedules  ScheduleEndowment[]
+  partitions Partition[]
+  agendas    Agenda[]
 
-  @@map("dotacion_escenario")
+  @@map("sc_scenario")
+  @@index([pk_id])
+  @@index([sc_name])
 }
 
-// Modelo Horarios Dotación
-model HorariosDotacion {
-  id                   Int      @id @default(autoincrement())
-  idCategoriaActividad Int      @map("id_categoria_actividad")
-  horaInicio           String   @map("hora_inicio") @db.VarChar(10)
-  horaFin              String   @map("hora_fin") @db.VarChar(10)
-  fechaInicio          DateTime @map("fecha_inicio") @db.Date
-  fechaFin             DateTime @map("fecha_fin") @db.Date
-  dotacionEscenario    Int      @map("dotacion_escenario")
-  idUsuario            Int      @map("id_usuario")
-  dia                  String   @db.VarChar(20)
-  createdAt            DateTime @default(now()) @map("created_at")
-  updatedAt            DateTime @updatedAt @map("updated_at")
+// Modelo Partition (Partición)
+model Partition {
+  pt_id     Int      @id @default(autoincrement()) @map("pt_id")
+  sc_id     Int      @map("sc_id")
+  pt_name   String   @map("pt_name") @db.VarChar(255)
+  create_at DateTime @default(now()) @map("create_at")
+  update_at DateTime @updatedAt @map("update_at")
+  deleted_at DateTime? @map("deleted_at")
 
   // Relaciones
-  categoriaActividad   CategoriaActividad @relation(fields: [idCategoriaActividad], references: [id], onDelete: Cascade)
-  dotacionEscenarioRel DotacionEscenario  @relation(fields: [dotacionEscenario], references: [id], onDelete: Cascade)
-  usuario              Usuario            @relation(fields: [idUsuario], references: [id], onDelete: Cascade)
+  scenario          Scenario           @relation(fields: [sc_id], references: [sc_id], onDelete: Cascade)
+  partitionSegments PartitionSegment[]
+  agendas           Agenda[]
 
-  @@map("horarios_dotacion")
+  @@map("sc_partition")
+  @@index([sc_id])
+  @@index([pt_name])
+}
+
+// Modelo PartitionSegment (Segmento Partición)
+model PartitionSegment {
+  ps_id     Int      @id @default(autoincrement()) @map("ps_id")
+  pt_id     Int      @map("pt_id")
+  ps_name   String   @map("ps_name") @db.VarChar(255)
+  create_at DateTime @default(now()) @map("create_at")
+  update_at DateTime @updatedAt @map("update_at")
+  deleted_at DateTime? @map("deleted_at")
+
+  // Relaciones
+  partition Partition @relation(fields: [pt_id], references: [pt_id], onDelete: Cascade)
+  agendas   Agenda[]
+
+  @@map("sc_partition_segment")
+  @@index([pt_id])
+  @@index([ps_name])
+}
+
+// ================================
+// MÓDULO HORARIOS (sh_)
+// ================================
+
+// Modelo ScheduleEndowment (Horarios Dotación)
+model ScheduleEndowment {
+  sh_id         Int      @id @default(autoincrement()) @map("sh_id")
+  ac_id         Int      @map("ac_id")
+  sh_start_time String   @map("sh_start_time") @db.VarChar(10)
+  sh_end_time   String   @map("sh_end_time") @db.VarChar(10)
+  sh_start_date DateTime @map("sh_start_date") @db.Date
+  sh_end_date   DateTime @map("sh_end_date") @db.Date
+  sc_id         Int      @map("sc_id")
+  us_id         Int      @map("us_id")
+  sh_day        String   @map("sh_day") @db.VarChar(20)
+  create_at     DateTime @default(now()) @map("create_at")
+  update_at     DateTime @updatedAt @map("update_at")
+  deleted_at    DateTime? @map("deleted_at")
+
+  // Relaciones
+  activityCategory ActivityCategory @relation(fields: [ac_id], references: [ac_id], onDelete: Cascade)
+  scenario         Scenario         @relation(fields: [sc_id], references: [sc_id], onDelete: Cascade)
+  user             User             @relation(fields: [us_id], references: [us_id], onDelete: Cascade)
+
+  @@map("sh_schedule_endowment")
+  @@index([ac_id])
+  @@index([sc_id])
+  @@index([us_id])
+  @@index([sh_start_date])
+  @@index([sh_day])
+}
+
+// ================================
+// MÓDULO AGENDA (ag_)
+// ================================
+
+// Modelo Agenda
+model Agenda {
+  ag_id         Int      @id @default(autoincrement()) @map("ag_id")
+  sc_id         Int      @map("sc_id")
+  pt_id         Int?     @map("pt_id")
+  ps_id         Int?     @map("ps_id")
+  us_id         Int      @map("us_id")
+  ag_start_time String   @map("ag_start_time") @db.VarChar(10)
+  ag_end_time   String   @map("ag_end_time") @db.VarChar(10)
+  ag_date       DateTime @map("ag_date") @db.Date
+  create_at     DateTime @default(now()) @map("create_at")
+  update_at     DateTime @updatedAt @map("update_at")
+  deleted_at    DateTime? @map("deleted_at")
+
+  // Relaciones
+  scenario         Scenario          @relation(fields: [sc_id], references: [sc_id], onDelete: Cascade)
+  partition        Partition?        @relation(fields: [pt_id], references: [pt_id], onDelete: SetNull)
+  partitionSegment PartitionSegment? @relation(fields: [ps_id], references: [ps_id], onDelete: SetNull)
+  user             User              @relation(fields: [us_id], references: [us_id], onDelete: Cascade)
+
+  @@map("ag_agenda")
+  @@index([sc_id])
+  @@index([pt_id])
+  @@index([ps_id])
+  @@index([us_id])
+  @@index([ag_date])
+  @@index([ag_start_time])
 }

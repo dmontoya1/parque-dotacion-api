@@ -23,12 +23,113 @@
 
 ## Description
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+API para la gestión de parques y dotaciones del IDRD (Instituto Distrital de Recreación y Deporte).
+
+Esta API está construida con [Nest](https://github.com/nestjs/nest) framework y utiliza Prisma como ORM para interactuar con la base de datos PostgreSQL.
+
+## API de Parques
+
+La API incluye operaciones CRUD completas para el modelo Parque, implementadas siguiendo patrones de diseño y principios SOLID:
+
+### Patrones de Diseño y Principios SOLID
+
+- **Patrón Repositorio**: Separa la lógica de acceso a datos de la lógica de negocio.
+- **Inyección de Dependencias**: Utiliza el sistema de DI de NestJS para desacoplar componentes.
+- **Principio de Responsabilidad Única (SRP)**: Cada clase tiene una única responsabilidad.
+- **Principio de Inversión de Dependencias (DIP)**: Depende de abstracciones, no de implementaciones concretas.
+- **Principio de Sustitución de Liskov (LSP)**: Las implementaciones de repositorio son intercambiables.
+- **Principio de Segregación de Interfaces (ISP)**: Interfaces específicas para cada necesidad.
+
+### Endpoints de la API de Parques
+
+| Método | Ruta | Descripción |
+|--------|------|-------------|
+| GET | /parques | Obtiene todos los parques |
+| GET | /parques/:id | Obtiene un parque por su ID |
+| POST | /parques | Crea un nuevo parque |
+| PUT | /parques/:id | Actualiza un parque existente |
+| DELETE | /parques/:id | Elimina un parque |
+
+### Ejemplos de Uso
+
+#### Obtener todos los parques
+```bash
+curl -X GET http://localhost:3000/parques
+```
+
+#### Obtener un parque por ID
+```bash
+curl -X GET http://localhost:3000/parques/1
+```
+
+#### Crear un nuevo parque
+```bash
+curl -X POST http://localhost:3000/parques \
+  -H "Content-Type: application/json" \
+  -d '{"nombre": "Parque Simón Bolívar", "direccion": "Calle 63 y 53 entre Carreras 48 y 68"}'
+```
+
+#### Actualizar un parque
+```bash
+curl -X PUT http://localhost:3000/parques/1 \
+  -H "Content-Type: application/json" \
+  -d '{"nombre": "Parque Metropolitano Simón Bolívar"}'
+```
+
+#### Eliminar un parque
+```bash
+curl -X DELETE http://localhost:3000/parques/1
+```
 
 ## Project setup
 
 ```bash
+# Instalar dependencias
 $ yarn install
+
+# Generar el cliente Prisma
+$ yarn prisma:generate
+
+# Aplicar migraciones a la base de datos
+$ yarn prisma:migrate
+
+# Opcional: Poblar la base de datos con datos iniciales
+$ yarn prisma:seed
+```
+
+## Estructura del Proyecto
+
+La implementación del CRUD de Parques sigue una arquitectura en capas y utiliza patrones de diseño para mantener el código limpio y mantenible:
+
+```
+src/
+├── prisma/                  # Módulo de Prisma
+│   ├── prisma.module.ts     # Módulo global para Prisma
+│   └── prisma.service.ts    # Servicio que extiende PrismaClient
+│
+├── parques/                 # Módulo de Parques
+│   ├── controllers/         # Controladores para manejar las peticiones HTTP
+│   │   ├── index.ts
+│   │   └── parques.controller.ts
+│   │
+│   ├── dto/                 # Objetos de Transferencia de Datos
+│   │   ├── create-parque.dto.ts
+│   │   ├── update-parque.dto.ts
+│   │   ├── parque-response.dto.ts
+│   │   └── index.ts
+│   │
+│   ├── repositories/        # Patrón Repositorio
+│   │   ├── parque-repository.interface.ts
+│   │   ├── prisma-parque.repository.ts
+│   │   └── index.ts
+│   │
+│   ├── services/            # Servicios con lógica de negocio
+│   │   ├── parques.service.ts
+│   │   └── index.ts
+│   │
+│   └── parques.module.ts    # Módulo que integra todos los componentes
+│
+└── app.module.ts            # Módulo principal de la aplicación
 ```
 
 ## Compile and run the project
