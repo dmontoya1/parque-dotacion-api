@@ -5,6 +5,7 @@ WORKDIR /app
 RUN apk add yarn
 
 COPY package.json ./
+COPY prisma ./prisma
 
 RUN yarn install
 
@@ -13,8 +14,6 @@ RUN yarn global add ts-node typescript
 
 COPY . .
 
-RUN yarn run prisma generate
-
 EXPOSE 3000
 
-CMD ["yarn", "run", "start:dev"]
+CMD ["sh", "./entrypoint.sh"]
