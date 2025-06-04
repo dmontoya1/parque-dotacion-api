@@ -13,6 +13,8 @@ RUN yarn global add ts-node typescript
 
 COPY . .
 
+RUN yarn run prisma generate
+
 EXPOSE 3000
 
 CMD ["yarn", "run", "start:dev"]

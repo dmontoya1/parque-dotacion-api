@@ -26,6 +26,7 @@ model Usuario {
 
   // Relaciones
   horariosDotacion HorariosDotacion[]
+  Agenda           Agenda[]
 
   @@map("usuarios")
 }
@@ -68,9 +69,11 @@ model DotacionEscenario {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  // Relaciones
   parque           Parque             @relation(fields: [parqueId], references: [id], onDelete: Cascade)
   horariosDotacion HorariosDotacion[]
+
+  carriles Carril[] @relation("EscenarioCarril")
+  agendas  Agenda[]
 
   @@map("dotacion_escenario")
 }
@@ -95,4 +98,54 @@ model HorariosDotacion {
   usuario              Usuario            @relation(fields: [idUsuario], references: [id], onDelete: Cascade)
 
   @@map("horarios_dotacion")
+}
+
+model Carril {
+  id                  Int      @id @default(autoincrement())
+  dotacionEscenarioId Int      @map("dotacion_escenario_id")
+  nombre              String   @db.VarChar(100)
+  createdAt           DateTime @default(now()) @map("created_at")
+  updatedAt           DateTime @updatedAt @map("updated_at")
+
+  dotacionEscenario DotacionEscenario @relation("EscenarioCarril", fields: [dotacionEscenarioId], references: [id])
+  subcarriles       Subcarril[]
+  agendas           Agenda[]
+
+  @@map("carriles")
+}
+
+model Subcarril {
+  id        Int      @id @default(autoincrement())
+  carrilId  Int      @map("carril_id")
+  nombre    String   @db.VarChar(100)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  carril  Carril   @relation(fields: [carrilId], references: [id], onDelete: Cascade)
+  agendas Agenda[]
+
+  @@map("subcarriles")
+}
+
+model Agenda {
+  id                  Int      @id @default(autoincrement())
+  dotacionEscenarioId Int?     @map("dotacion_escenario_id") // Asignación directa al escenario
+  carrilId            Int?     @map("carril_id") // Asignación al carril
+  subcarrilId         Int?     @map("subcarril_id") // Asignación al subcarril
+  usuarioId           Int      @map("usuario_id")
+  fechaInicio         DateTime @map("fecha_inicio")
+  fechaFin            DateTime @map("fecha_fin")
+  horaInicio          String   @map("hora_inicio") @db.VarChar(10)
+  horaFin             String   @map("hora_fin") @db.VarChar(10)
+  tipoAsignacion      String   @db.VarChar(100) // semanal, semestral, etc.
+  createdAt           DateTime @default(now()) @map("created_at")
+  updatedAt           DateTime @updatedAt @map("updated_at")
+
+  // Relaciones
+  dotacionEscenario DotacionEscenario? @relation(fields: [dotacionEscenarioId], references: [id], onDelete: Cascade)
+  carril            Carril?            @relation(fields: [carrilId], references: [id], onDelete: Cascade)
+  subcarril         Subcarril?         @relation(fields: [subcarrilId], references: [id], onDelete: Cascade)
+  usuario           Usuario            @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+
+  @@map("agenda")
 }
