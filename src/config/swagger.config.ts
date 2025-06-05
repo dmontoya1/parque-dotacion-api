@@ -6,9 +6,11 @@ export function setupSwagger(app: INestApplication): void {
   const configService = app.get(ConfigService);
 
   const config = new DocumentBuilder()
-    .setTitle(configService.get<string>('app.swagger.title'))
-    .setDescription(configService.get<string>('app.swagger.description'))
-    .setVersion(configService.get<string>('app.swagger.version'))
+    .setTitle(configService.get<string>('app.swagger.title') || 'API')
+    .setDescription(
+      configService.get<string>('app.swagger.description') || 'API Description',
+    )
+    .setVersion(configService.get<string>('app.swagger.version') || '1.0')
     .addBearerAuth(
       {
         type: 'http',
@@ -22,10 +24,13 @@ export function setupSwagger(app: INestApplication): void {
     )
     .addTag('Auth', 'Authentication endpoints')
     .addTag('Users', 'User management')
-    .addTag('Parques', 'Park management')
-    .addTag('Categoria Actividad', 'Activity category management')
-    .addTag('Dotacion Escenario', 'Scenario equipment management')
-    .addTag('Horarios Dotacion', 'Schedule management')
+    .addTag('Parks', 'Park management')
+    .addTag('Activity Categories', 'Activity category management')
+    .addTag('Scenarios', 'Scenario equipment management')
+    .addTag('Partitions', 'Partition management')
+    .addTag('Partition Segments', 'Partition segment management')
+    .addTag('Schedule Endowments', 'Schedule management')
+    .addTag('Agendas', 'Agenda management')
     .build();
 
   const document = SwaggerModule.createDocument(app, config);

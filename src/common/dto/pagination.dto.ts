@@ -11,7 +11,7 @@ export class PaginationDto {
   @IsOptional()
   @Type(() => Number)
   @IsPositive()
-  page?: number = 1;
+  page: number = 1;
 
   @ApiPropertyOptional({
     description: 'Number of items per page',
@@ -23,7 +23,7 @@ export class PaginationDto {
   @Type(() => Number)
   @IsPositive()
   @Min(1)
-  limit?: number = 10;
+  limit: number = 10;
 
   get skip(): number {
     return (this.page - 1) * this.limit;

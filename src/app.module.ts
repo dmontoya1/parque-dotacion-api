@@ -8,14 +8,14 @@ import appConfig from './config/app.config';
 
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { PrismaModule } from './prisma/prisma.module';
-import { ActivityCategoryService } from './activity-category/activity-category.service';
 
 // Prisma
 import { PrismaModule } from './prisma/prisma.module';
 
 // Common
 import { PrismaClientExceptionFilter } from './common/exceptions/prisma-exception.filter';
+
+// Modules
 
 // Modules
 /*import { AuthModule } from './modules/auth/auth.module';
@@ -43,12 +43,14 @@ import { AgendasModule } from './modules/agendas/agendas.module';*/
     // Throttling
     ThrottlerModule.forRootAsync({
       inject: [ConfigService],
-      useFactory: (configService: ConfigService) => [
-        {
-          ttl: configService.get<number>('app.throttle.ttl'),
-          limit: configService.get<number>('app.throttle.limit'),
-        },
-      ],
+      useFactory: (configService: ConfigService) => ({
+        throttlers: [
+          {
+            ttl: configService.get<number>('app.throttle.ttl') || 60,
+            limit: configService.get<number>('app.throttle.limit') || 10,
+          },
+        ],
+      }),
     }),
 
     // Cache
