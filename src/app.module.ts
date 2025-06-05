@@ -8,6 +8,8 @@ import appConfig from './config/app.config';
 
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { PrismaModule } from './prisma/prisma.module';
+import { ActivityCategoryService } from './activity-category/activity-category.service';
 
 // Prisma
 import { PrismaModule } from './prisma/prisma.module';

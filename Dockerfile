@@ -9,8 +9,8 @@ WORKDIR /app
 COPY package*.json ./
 COPY prisma ./prisma/
 
-# Instalar dependencias
-RUN npm ci --only=production
+COPY package.json ./
+COPY prisma ./prisma
 
 # Generar cliente de Prisma
 RUN npx prisma generate
@@ -23,5 +23,4 @@ RUN npm run build
 
 EXPOSE 3000
 
-# Script de inicio que ejecuta migraciones y luego la app
-CMD ["sh", "-c", "npx prisma migrate deploy && npm run start:prod"]
+CMD ["sh", "./entrypoint.sh"]
