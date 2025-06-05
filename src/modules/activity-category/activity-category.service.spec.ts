@@ -55,7 +55,7 @@ describe('ActivityCategoryService', () => {
 
   describe('findOne', () => {
     it('debe retornar una categoría por id', async () => {
-      const category = { id: 1, name: 'Música' };
+      const category = { id: 1, name: 'Deporte' };
       prismaMock.activityCategory.findUnique = jest.fn().mockResolvedValue(category);
 
       const result = await service.findOne(1);
@@ -67,7 +67,7 @@ describe('ActivityCategoryService', () => {
   describe('update', () => {
     it('debe actualizar una categoría', async () => {
       const dto = { name: 'Arte' };
-      const updated = { ac_id: 1, name: 'Arte' };
+      const updated = { ac_id: 1, name: 'Deporte' };
       prismaMock.activityCategory.update = jest.fn().mockResolvedValue(updated);
 
       const result = await service.update(1, dto as any);
@@ -78,7 +78,7 @@ describe('ActivityCategoryService', () => {
 
   describe('delete', () => {
     it('debe eliminar una categoría', async () => {
-      const deleted = { id: 1, name: 'Ciencia' };
+      const deleted = { id: 1, name: 'Deporte' };
       prismaMock.activityCategory.delete = jest.fn().mockResolvedValue(deleted);
 
       const result = await service.delete(1);
