@@ -6,6 +6,6 @@ export class ActivityCategoryService {
     constructor(private readonly prisma: PrismaService) {}
 
     findAll() {
-        return this.prisma.categoriaActividad.findMany();
+        return this.prisma.activityCategory.findMany();
     }
 }

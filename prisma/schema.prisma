@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
   output   = "../generated/prisma"
@@ -14,138 +8,140 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// Modelo Usuario
-model Usuario {
+// User model
+model User {
+  id        Int      @id @default(autoincrement())
+  name      String   @db.VarChar(255)
+  email     String   @unique @db.VarChar(255)
+  userType  String   @map("user_type") @db.VarChar(50)
+  password  String?  @db.VarChar(255)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  allocationSchedules AllocationSchedule[]
+  agendas             Agenda[]
+
+  @@map("us_users")
+}
+
+// Park model
+model Park {
+  id        Int      @id @default(autoincrement())
+  name      String   @db.VarChar(255)
+  address   String   @db.VarChar(500)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  stageAllocations StageAllocation[]
+
+  @@map("gn_parks")
+}
+
+// ActivityCategory model
+model ActivityCategory {
+  id            Int      @id @default(autoincrement())
+  name          String   @db.VarChar(255)
+  priorityLevel Int      @map("priority_level")
+  description   String?  @db.Text
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  allocationSchedules AllocationSchedule[]
+
+  @@map("gn_activity_categories")
+}
+
+// StageAllocation model
+model StageAllocation {
+  id        Int      @id @default(autoincrement())
+  parkId    Int      @map("park_id")
+  name      String   @db.VarChar(255)
+  address   String   @db.VarChar(500)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  park                Park                 @relation(fields: [parkId], references: [id], onDelete: Cascade)
+  allocationSchedules AllocationSchedule[]
+
+  partitions Partition[] @relation("StagePartition")
+  agendas    Agenda[]
+
+  @@map("gn_stage_allocations")
+}
+
+// AllocationSchedule model
+model AllocationSchedule {
+  id                 Int      @id @default(autoincrement())
+  activityCategoryId Int      @map("activity_category_id")
+  startTime          DateTime @map("start_time")
+  endTime            DateTime @map("end_time")
+  startDate          DateTime @map("start_date") @db.Date
+  endDate            DateTime @map("end_date") @db.Date
+  stageAllocationId  Int      @map("stage_allocation_id")
+  userId             Int      @map("user_id")
+  day                String   @db.VarChar(20)
+  createdAt          DateTime @default(now()) @map("created_at")
+  updatedAt          DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  activityCategory ActivityCategory @relation(fields: [activityCategoryId], references: [id], onDelete: Cascade)
+  stageAllocation  StageAllocation  @relation(fields: [stageAllocationId], references: [id], onDelete: Cascade)
+  user             User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("gn_allocation_schedules")
+}
+
+// Partition model
+model Partition {
+  id                Int      @id @default(autoincrement())
+  stageAllocationId Int      @map("stage_allocation_id")
+  name              String   @db.VarChar(100)
+  createdAt         DateTime @default(now()) @map("created_at")
+  updatedAt         DateTime @updatedAt @map("updated_at")
+
+  stageAllocation   StageAllocation    @relation("StagePartition", fields: [stageAllocationId], references: [id])
+  partitionSegments PartitionSegment[]
+  agendas           Agenda[]
+
+  @@map("gn_partitions")
+}
+
+// PartitionSegment model
+model PartitionSegment {
   id          Int      @id @default(autoincrement())
-  nombre      String   @db.VarChar(255)
-  correo      String   @unique @db.VarChar(255)
-  tipoUsuario String   @map("tipo_usuario") @db.VarChar(50)
-  password    String?  @db.VarChar(255)
+  partitionId Int      @map("partition_id")
+  name        String   @db.VarChar(100)
   createdAt   DateTime @default(now()) @map("created_at")
   updatedAt   DateTime @updatedAt @map("updated_at")
 
-  // Relaciones
-  horariosDotacion HorariosDotacion[]
-  Agenda           Agenda[]
+  partition Partition @relation(fields: [partitionId], references: [id], onDelete: Cascade)
+  agendas   Agenda[]
 
-  @@map("usuarios")
+  @@map("gn_partition_segments")
 }
 
-// Modelo Parque
-model Parque {
-  id        Int      @id @default(autoincrement())
-  nombre    String   @db.VarChar(255)
-  direccion String   @db.VarChar(500)
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
-
-  // Relaciones
-  dotacionesEscenario DotacionEscenario[]
-
-  @@map("parques")
-}
-
-// Modelo Categoría Actividad
-model CategoriaActividad {
-  id             Int      @id @default(autoincrement())
-  nombre         String   @db.VarChar(255)
-  nivelPrioridad Int      @map("nivel_prioridad")
-  descripcion    String?  @db.Text
-  createdAt      DateTime @default(now()) @map("created_at")
-  updatedAt      DateTime @updatedAt @map("updated_at")
-
-  // Relaciones
-  horariosDotacion HorariosDotacion[]
-
-  @@map("categoria_actividad")
-}
-
-// Modelo Dotación Escenario
-model DotacionEscenario {
-  id        Int      @id @default(autoincrement())
-  parqueId  Int      @map("parque_id")
-  nombre    String   @db.VarChar(255)
-  direccion String   @db.VarChar(500)
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
-
-  parque           Parque             @relation(fields: [parqueId], references: [id], onDelete: Cascade)
-  horariosDotacion HorariosDotacion[]
-
-  carriles Carril[] @relation("EscenarioCarril")
-  agendas  Agenda[]
-
-  @@map("dotacion_escenario")
-}
-
-// Modelo Horarios Dotación
-model HorariosDotacion {
-  id                   Int      @id @default(autoincrement())
-  idCategoriaActividad Int      @map("id_categoria_actividad")
-  horaInicio           String   @map("hora_inicio") @db.VarChar(10)
-  horaFin              String   @map("hora_fin") @db.VarChar(10)
-  fechaInicio          DateTime @map("fecha_inicio") @db.Date
-  fechaFin             DateTime @map("fecha_fin") @db.Date
-  dotacionEscenario    Int      @map("dotacion_escenario")
-  idUsuario            Int      @map("id_usuario")
-  dia                  String   @db.VarChar(20)
-  createdAt            DateTime @default(now()) @map("created_at")
-  updatedAt            DateTime @updatedAt @map("updated_at")
-
-  // Relaciones
-  categoriaActividad   CategoriaActividad @relation(fields: [idCategoriaActividad], references: [id], onDelete: Cascade)
-  dotacionEscenarioRel DotacionEscenario  @relation(fields: [dotacionEscenario], references: [id], onDelete: Cascade)
-  usuario              Usuario            @relation(fields: [idUsuario], references: [id], onDelete: Cascade)
-
-  @@map("horarios_dotacion")
-}
-
-model Carril {
-  id                  Int      @id @default(autoincrement())
-  dotacionEscenarioId Int      @map("dotacion_escenario_id")
-  nombre              String   @db.VarChar(100)
-  createdAt           DateTime @default(now()) @map("created_at")
-  updatedAt           DateTime @updatedAt @map("updated_at")
-
-  dotacionEscenario DotacionEscenario @relation("EscenarioCarril", fields: [dotacionEscenarioId], references: [id])
-  subcarriles       Subcarril[]
-  agendas           Agenda[]
-
-  @@map("carriles")
-}
-
-model Subcarril {
-  id        Int      @id @default(autoincrement())
-  carrilId  Int      @map("carril_id")
-  nombre    String   @db.VarChar(100)
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
-
-  carril  Carril   @relation(fields: [carrilId], references: [id], onDelete: Cascade)
-  agendas Agenda[]
-
-  @@map("subcarriles")
-}
-
+// Agenda model
 model Agenda {
-  id                  Int      @id @default(autoincrement())
-  dotacionEscenarioId Int?     @map("dotacion_escenario_id") // Asignación directa al escenario
-  carrilId            Int?     @map("carril_id") // Asignación al carril
-  subcarrilId         Int?     @map("subcarril_id") // Asignación al subcarril
-  usuarioId           Int      @map("usuario_id")
-  fechaInicio         DateTime @map("fecha_inicio")
-  fechaFin            DateTime @map("fecha_fin")
-  horaInicio          String   @map("hora_inicio") @db.VarChar(10)
-  horaFin             String   @map("hora_fin") @db.VarChar(10)
-  tipoAsignacion      String   @db.VarChar(100) // semanal, semestral, etc.
-  createdAt           DateTime @default(now()) @map("created_at")
-  updatedAt           DateTime @updatedAt @map("updated_at")
+  id                 Int      @id @default(autoincrement())
+  stageAllocationId  Int?     @map("stage_allocation_id")
+  partitionId        Int?     @map("partition_id")
+  partitionSegmentId Int?     @map("partition_segment_id")
+  userId             Int      @map("user_id")
+  startDate          DateTime @map("start_date")
+  endDate            DateTime @map("end_date")
+  startTime          DateTime @map("start_time")
+  endTime            DateTime @map("end_time")
+  createdAt          DateTime @default(now()) @map("created_at")
+  updatedAt          DateTime @updatedAt @map("updated_at")
 
-  // Relaciones
-  dotacionEscenario DotacionEscenario? @relation(fields: [dotacionEscenarioId], references: [id], onDelete: Cascade)
-  carril            Carril?            @relation(fields: [carrilId], references: [id], onDelete: Cascade)
-  subcarril         Subcarril?         @relation(fields: [subcarrilId], references: [id], onDelete: Cascade)
-  usuario           Usuario            @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+  // Relations
+  stageAllocation  StageAllocation?  @relation(fields: [stageAllocationId], references: [id], onDelete: Cascade)
+  partition        Partition?        @relation(fields: [partitionId], references: [id], onDelete: Cascade)
+  partitionSegment PartitionSegment? @relation(fields: [partitionSegmentId], references: [id], onDelete: Cascade)
+  user             User              @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@map("agenda")
+  @@map("gn_agendas")
 }
