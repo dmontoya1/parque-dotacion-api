@@ -11,13 +11,11 @@ import { AppService } from './app.service';
 
 // Prisma
 import { PrismaModule } from './prisma/prisma.module';
-import { ActivityCategoryService } from './modules/activity-category/activity-category.service';
 import { ActivityCategoryModule } from './modules/activity-category/activity-category.module';
 
 // Common
 import { PrismaClientExceptionFilter } from './common/exceptions/prisma-exception.filter';
 
-// Modules
 
 // Modules
 /*import { AuthModule } from './modules/auth/auth.module';
@@ -32,14 +30,12 @@ import { AgendasModule } from './modules/agendas/agendas.module';*/
 
 @Module({
   imports: [
-    // Configuration
     ConfigModule.forRoot({
       isGlobal: true,
       load: [appConfig],
       envFilePath: '.env',
     }),
 
-    // Prisma Database
     PrismaModule,
 
     // Throttling
@@ -71,14 +67,15 @@ import { AgendasModule } from './modules/agendas/agendas.module';*/
     PartitionSegmentsModule,
     ScheduleEndowmentsModule,
     AgendasModule,*/
+  ActivityCategoryModule,
   ],
-  controllers: [AppController],
+  controllers: [AppController, ],
   providers: [
-    AppService,
-    {
-      provide: APP_FILTER,
-      useClass: PrismaClientExceptionFilter,
-    },
+  AppService,
+  {
+    provide: APP_FILTER,
+    useClass: PrismaClientExceptionFilter,
+  },
   ],
 })
 export class AppModule {}
