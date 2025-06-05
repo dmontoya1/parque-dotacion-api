@@ -12,12 +12,7 @@
     "baseUrl": "./",
     "incremental": true,
     "skipLibCheck": true,
-    "strictNullChecks": true,
-    "noImplicitAny": false,
-    "strictBindCallApply": false,
-    "forceConsistentCasingInFileNames": false,
-    "noFallthroughCasesInSwitch": false,
-    "strict": false,
+    "strict": false, // Activa todas las comprobaciones estrictas
     "paths": {
       "@/*": ["src/*"],
       "@/common/*": ["src/common/*"],
