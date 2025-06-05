@@ -11,22 +11,22 @@ export class ActivityCategoryService {
         return this.prisma.activityCategory.findMany();
     }
 
-    findOne(id: number) {
-        return this.prisma.activityCategory.findUnique({ where: { id } });
+    findOne(ac_id: number) {
+        return this.prisma.activityCategory.findUnique({ where: { ac_id } });
     }
 
     create(dto: CreateActivityCategoryDto) {
         return this.prisma.activityCategory.create({ data: dto });
     }
 
-    update(id: number, dto: UpdateActivityCategoryDto) {
+    update(ac_id: number, dto: UpdateActivityCategoryDto) {
         return this.prisma.activityCategory.update({
-            where: { id },
+            where: { ac_id },
             data: dto,
         });
     }
 
-    delete(id: number) {
-        return this.prisma.activityCategory.delete({ where: { id } });
+    delete(ac_id: number) {
+        return this.prisma.activityCategory.delete({ where: { ac_id } });
     }
 }

@@ -2,13 +2,13 @@ import { IsString, IsOptional, IsInt, Min } from 'class-validator';
 
 export class CreateActivityCategoryDto {
   @IsString()
-  name: string;
+  ac_name: string;
 
   @IsOptional()
   @IsString()
-  description?: string;
+  ac_description?: string;
 
   @IsInt()
   @Min(1)
-  priorityLevel: number;
+  ac_priority_level: number;
 }
