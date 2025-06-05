@@ -11,6 +11,8 @@ import { AppService } from './app.service';
 
 // Prisma
 import { PrismaModule } from './prisma/prisma.module';
+import { ActivityCategoryService } from './modules/activity-category/activity-category.service';
+import { ActivityCategoryModule } from './modules/activity-category/activity-category.module';
 
 // Common
 import { PrismaClientExceptionFilter } from './common/exceptions/prisma-exception.filter';
