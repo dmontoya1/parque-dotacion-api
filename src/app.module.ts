@@ -28,6 +28,7 @@ import { PartitionSegmentsModule } from './modules/partition-segments/partition-
 import { ScheduleEndowmentsModule } from './modules/schedule-endowments/schedule-endowments.module';
 import { AgendasModule } from './modules/agendas/agendas.module';*/
 import { ScScenarioModule } from './modules/sc-scenario/sc-scenario.module';
+import { ScPartitionController } from './modules/sc_partition/sc_partition.controller';
 
 @Module({
   imports: [
@@ -71,7 +72,7 @@ import { ScScenarioModule } from './modules/sc-scenario/sc-scenario.module';
     ActivityCategoryModule,
     ScScenarioModule,
   ],
-  controllers: [AppController, ],
+  controllers: [AppController, ScPartitionController, ],
   providers: [
   AppService,
   {

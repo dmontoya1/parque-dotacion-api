@@ -16,7 +16,12 @@ export class ScScenarioService {
     return this.prisma.scenario.findUnique({ where: { sc_id } });
   }
 
-  create(dto: CreateScScenarioDto): Promise<ScScenario> {
+  async create(dto: CreateScScenarioDto): Promise<ScScenario> {
+    const park = await this.prisma.park.findUnique({ where: { pk_id: dto.parkId } });
+    if (!park) {
+      throw new Error('El parque especificado no existe');
+    }
+
     return this.prisma.scenario.create({
       data: {
         pk_id: dto.parkId,
@@ -26,7 +31,14 @@ export class ScScenarioService {
     });
   }
 
-  update(sc_id: number, dto: UpdateScScenarioDto): Promise<ScScenario> {
+  async update(sc_id: number, dto: UpdateScScenarioDto): Promise<ScScenario> {
+    if (dto.parkId !== undefined) {
+      const park = await this.prisma.park.findUnique({ where: { pk_id: dto.parkId } });
+      if (!park) {
+        throw new Error('El parque especificado no existe');
+      }
+    }
+
     return this.prisma.scenario.update({
       where: { sc_id },
       data: {
